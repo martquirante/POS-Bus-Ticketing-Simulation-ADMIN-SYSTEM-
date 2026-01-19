@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Super Admin Portal | POS Bus Ticketing</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+    <script type="text/javascript">
+        (function () {
+            // ⚠️ PALITAN ITO NG PUBLIC KEY MO (Galing sa EmailJS Dashboard)
+            emailjs.init("YOUR_PUBLIC_KEY_HERE");
+        })();
+    </script>
+</head>
+
+<body>
+
+    <div class="bg-overlay"></div>
+
+    <div id="authSection" class="login-overlay" style="display: flex;">
+        <div class="login-box glass-effect" style="width: 420px; padding: 40px; border-radius: 20px;">
+
+            <div class="text-center mb-4">
+                <div
+                    style="background: white; width: 80px; height: 80px; border-radius: 50%; margin: 0 auto; display: flex; align-items: center; justify-content: center; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <img src="assets/bus_logo.png" alt="Logo" width="50"
+                        onerror="this.src='https://cdn-icons-png.flaticon.com/512/3448/3448339.png'">
+                </div>
+                <h3 class="fw-bold mt-3 text-primary">SUPER ADMIN</h3>
+                <p class="text-muted small">Account Management Portal</p>
+            </div>
+
+            <ul class="nav nav-pills nav-fill mb-4 p-1 bg-light rounded-pill border" id="pills-tab">
+                <li class="nav-item">
+                    <button class="nav-link active rounded-pill fw-bold" id="tab-login"
+                        onclick="window.switchAuth('login')">Login</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link rounded-pill fw-bold" id="tab-signup"
+                        onclick="window.switchAuth('signup')">Sign Up</button>
+                </li>
+            </ul>
+
+            <form id="loginForm" onsubmit="event.preventDefault(); window.performLogin();" class="text-start">
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-secondary ps-2">USERNAME / EMAIL</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="fas fa-user text-primary"></i></span>
+                        <input type="text" id="loginUser" class="form-control border-start-0 ps-0"
+                            placeholder="Enter your username" required>
+                    </div>
+                </div>
+                <div class="mb-4">
+                    <label class="form-label small fw-bold text-secondary ps-2">PASSWORD</label>
+                    <div class="input-group">
+                        <span class="input-group-text bg-white border-end-0"><i
+                                class="fas fa-lock text-primary"></i></span>
+                        <input type="password" id="loginPass" class="form-control border-start-0 ps-0"
+                            placeholder="••••••••" required>
+                    </div>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-2 fw-bold shadow-sm rounded-pill">
+                    ACCESS PORTAL <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+            </form>
+
+            <form id="signupForm" style="display: none;" onsubmit="event.preventDefault(); window.performSignup();"
+                class="text-start">
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-secondary ps-1">FULL NAME</label>
+                    <input type="text" id="regName" class="form-control" placeholder="Juan Dela Cruz" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-secondary ps-1">EMAIL / USERNAME</label>
+                    <input type="text" id="regUser" class="form-control" placeholder="juan@gmail.com" required>
+                </div>
+                <div class="mb-2">
+                    <label class="form-label small fw-bold text-secondary ps-1">PASSWORD</label>
+                    <input type="password" id="regPass" class="form-control" placeholder="Create Password" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-bold text-danger ps-1">MASTER KEY</label>
+                    <input type="password" id="regKey" class="form-control border-danger bg-danger-subtle"
+                        placeholder="Secure Code" required>
+                    <div class="form-text text-danger small text-center fw-bold mt-1"><i class="fas fa-lock"></i> Ask
+                        System Owner (Default: 123456)</div>
+                </div>
+                <button type="submit" class="btn btn-success w-100 py-2 fw-bold shadow-sm rounded-pill">
+                    REGISTER ADMIN <i class="fas fa-user-plus ms-2"></i>
+                </button>
+            </form>
+
+        </div>
+    </div>
+
+    <div id="mainPortal" class="container py-5" style="display: none;">
+
+        <div class="d-flex justify-content-between align-items-center mb-4 glass-card p-4 shadow-sm"
+            style="border-radius: 15px; background: rgba(255,255,255,0.9);">
+            <div class="d-flex align-items-center gap-3">
+                <img src="assets/bus_logo.png" width="60" alt="Logo"
+                    onerror="this.src='https://cdn-icons-png.flaticon.com/512/3448/3448339.png'">
+                <div>
+                    <h3 class="fw-bold text-primary m-0">POS Bus Ticketing</h3>
+                    <small class="text-muted">Logged in as: <span id="adminNameDisplay"
+                            class="fw-bold text-dark">...</span></small>
+                </div>
+            </div>
+            <button onclick="window.logout()" class="btn btn-outline-danger btn-sm px-4 fw-bold rounded-pill shadow-sm">
+                <i class="fas fa-sign-out-alt me-1"></i> LOGOUT
+            </button>
+        </div>
+
+        <div class="row g-4">
+
+            <div class="col-lg-6">
+                <div class="card glass-card h-100 border-warning shadow-sm">
+                    <div class="card-header-custom bg-warning-subtle text-warning-emphasis flex-between p-3">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-user-clock me-2"></i> Pending Requests</h5>
+                        <span class="badge bg-warning text-dark shadow-sm rounded-pill px-3" id="pendingCount">0</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="alert alert-light small border m-3 d-flex align-items-center">
+                            <i class="fas fa-info-circle text-primary me-2 fa-lg"></i>
+                            <div>Approving a user will <strong>auto-generate a password</strong> and email it to them
+                                instantly.</div>
+                        </div>
+                        <div class="table-responsive custom-scrollbar" style="max-height: 500px;">
+                            <table class="table custom-table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Applicant Info</th>
+                                        <th>Role</th>
+                                        <th class="text-center">Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingTable">
+                                    <tr>
+                                        <td colspan="3" class="text-center text-muted py-5"><i
+                                                class="fas fa-check-circle fa-3x mb-3 d-block opacity-25"></i>No pending
+                                            signups.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card glass-card h-100 border-success shadow-sm">
+                    <div class="card-header-custom bg-success-subtle text-success-emphasis flex-between p-3">
+                        <h5 class="mb-0 fw-bold"><i class="fas fa-users-cog me-2"></i> Active Workforce</h5>
+                        <button class="btn btn-sm btn-success fw-bold rounded-pill shadow-sm px-3"
+                            onclick="window.open('index.html', '_blank')">
+                            <i class="fas fa-map-marked-alt me-1"></i> OPEN LIVE MAP
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-3">
+                            <div class="input-group shadow-sm">
+                                <span class="input-group-text bg-white border-end-0"><i
+                                        class="fas fa-search text-muted"></i></span>
+                                <input type="text" id="searchUser" class="form-control border-start-0"
+                                    placeholder="Search employee name or email...">
+                            </div>
+                        </div>
+                        <div class="table-responsive custom-scrollbar" style="max-height: 500px;">
+                            <table class="table custom-table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th class="ps-3">Employee</th>
+                                        <th>Role</th>
+                                        <th>Status</th>
+                                        <th class="text-center">Manage</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="activeTable">
+                                    <tr>
+                                        <td colspan="4" class="text-center text-muted py-5"><i
+                                                class="fas fa-users fa-3x mb-3 d-block opacity-25"></i>Loading users...
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="approveModal" class="login-overlay" style="display: none;">
+        <div class="login-box glass-effect" style="width: 450px; text-align: left; position: relative;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h4 class="text-primary m-0 fw-bold"><i class="fas fa-user-check me-2"></i> Approve Account</h4>
+                <button class="btn-close"
+                    onclick="document.getElementById('approveModal').style.display='none'"></button>
+            </div>
+
+            <form onsubmit="event.preventDefault(); window.confirmApproval();">
+                <input type="hidden" id="approveKey"><input type="hidden" id="approveEmail"><input type="hidden"
+                    id="approveName">
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-secondary">ASSIGN ROLE</label>
+                    <select id="assignRole" class="form-select bg-light border-primary">
+                        <option value="Conductor">Conductor</option>
+                        <option value="Driver">Driver</option>
+                        <option value="Inspector">Inspector</option>
+                        <option value="Admin">Admin</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-bold small text-secondary">GENERATED PASSWORD</label>
+                    <div class="input-group">
+                        <input type="text" id="genPassword"
+                            class="form-control fw-bold text-center text-primary bg-white fs-5" readonly>
+                        <button class="btn btn-outline-secondary" type="button" onclick="window.generatePass()"
+                            title="Generate New">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                    <div class="form-text text-success small mt-2">
+                        <i class="fas fa-paper-plane"></i> Credentials will be sent to: <br><strong id="emailDisplay"
+                            class="text-dark"></strong>
+                    </div>
+                </div>
+
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary fw-bold py-2 rounded-pill shadow-sm">
+                        APPROVE & SEND EMAIL <i class="fas fa-envelope ms-2"></i>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script type="module" src="admin_accounts.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,1273 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="description" content="POS Bus Ticketing Simulation Command Center Dashboard">
+    <title>POS Bus Ticketing | Command Center Dashboard</title>
+
+    <!-- CSS Libraries -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Preload critical assets -->
+    <link rel="preload" href="assets/bus_logo.png" as="image">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+
+    <!-- PWA Manifest (optional) -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4361ee">
+
+    <!-- Apple Touch Icons -->
+    <link rel="apple-touch-icon" href="assets/bus_logo.png">
+
+    <link rel="stylesheet" href="theme-font-fix.css">
+
+</head>
+
+<body>
+    <!-- 🔐 LOGIN MODAL -->
+    <div id="loginModal" class="login-overlay" style="display: flex;">
+        <div class="login-box glass-effect">
+            <div class="logo-circle">
+                <img src="assets/bus_logo.png" alt="POS Bus Logo" width="60"
+                    onerror="this.src='https://cdn-icons-png.flaticon.com/512/3448/3448339.png'">
+            </div>
+            <h3 class="fw-bold text-primary mb-1">COMMAND CENTER</h3>
+            <p class="text-muted small mb-4">POS Bus Ticketing Simulation</p>
+
+            <form id="loginForm" class="text-start">
+                <div class="form-floating mb-3">
+                    <input type="text" class="form-control" id="loginEmail" placeholder="name@example.com"
+                        value="admin@posticketing.com" required>
+                    <label for="loginEmail"><i class="fas fa-user me-2"></i> Username / Email</label>
+                </div>
+                <div class="form-floating mb-4">
+                    <input type="password" class="form-control" id="loginPass" placeholder="Password" value="admin123"
+                        required>
+                    <label for="loginPass"><i class="fas fa-lock me-2"></i> Password</label>
+                </div>
+                <button type="submit" class="btn btn-primary w-100 py-3 fw-bold rounded-pill shadow-sm">
+                    SECURE LOGIN <i class="fas fa-arrow-right ms-2"></i>
+                </button>
+                <div class="text-center mt-4">
+                    <small class="text-muted">Need access? <a href="#" class="text-primary fw-bold text-decoration-none"
+                            onclick="alert('Please contact System Owner for account creation.')">Contact
+                            Admin</a></small>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- 🌫️ BACKGROUND OVERLAY -->
+    <div class="bg-overlay" aria-hidden="true"></div>
+
+    <!-- 📊 MAIN DASHBOARD CONTAINER -->
+    <div id="mainDashboard" class="dashboard-container">
+
+        <!-- 🎯 SIDEBAR -->
+        <aside class="sidebar glass-effect">
+            <div class="sidebar-header">
+                <div class="brand-logo">
+                    <img src="assets/bus_logo.png" alt="POS Bus Logo" width="40"
+                        onerror="this.src='https://cdn-icons-png.flaticon.com/512/3448/3448339.png'">
+                </div>
+                <div class="brand-info">
+                    <h4 class="m-0 fw-bold text-primary">POS BUS</h4>
+                    <span class="small text-muted">System Admin</span>
+                </div>
+                <!-- 📱 MOBILE MENU TOGGLE -->
+                <button class="sidebar-toggle d-lg-none" id="sidebarToggle" aria-label="Toggle sidebar">
+                    <i class="fas fa-bars"></i>
+                </button>
+            </div>
+
+            <!-- 📜 NAVIGATION MENU -->
+            <nav class="sidebar-menu" id="sidebarMenu">
+                <a href="#dashboard-stats" class="nav-link active" onclick="switchTab(event, 'dashboard-stats')"
+                    aria-label="Dashboard">
+                    <i class="fas fa-chart-pie"></i> <span>Dashboard</span>
+                </a>
+                <a href="#map-section" class="nav-link" onclick="switchTab(event, 'map-section')"
+                    aria-label="Live Fleet Map">
+                    <i class="fas fa-map-marked-alt"></i> <span>Live Fleet Map</span>
+                </a>
+                <a href="#sales" class="nav-link" onclick="switchTab(event, 'sales')" aria-label="Sales & Analytics">
+                    <i class="fas fa-coins"></i> <span>Sales & Analytics</span>
+                </a>
+                <a href="#logs" class="nav-link" onclick="switchTab(event, 'logs')" aria-label="Transaction Logs">
+                    <i class="fas fa-file-invoice"></i> <span>Transaction Logs</span>
+                </a>
+                <a href="#config" class="nav-link" onclick="switchTab(event, 'config')"
+                    aria-label="Route Configuration">
+                    <i class="fas fa-cogs"></i> <span>Route Config</span>
+                </a>
+                <a href="#admin-tools" class="nav-link d-lg-none" onclick="switchTab(event, 'admin-tools')"
+                    aria-label="Admin Tools">
+                    <i class="fas fa-tools"></i> <span>Admin Tools</span>
+                </a>
+            </nav>
+
+            <!-- 👤 USER PROFILE & LOGOUT -->
+            <div class="sidebar-footer">
+                <div class="user-mini-profile d-flex align-items-center gap-2 mb-3">
+                    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="User" width="40"
+                        class="rounded-circle border">
+                    <div style="line-height: 1.2;">
+                        <strong id="adminNameDisplay" class="d-block text-dark">Admin User</strong>
+                        <small class="text-success" style="font-size: 0.75rem;">● Online</small>
+                    </div>
+                </div>
+                <button onclick="window.logout()" class="btn btn-outline-danger w-100 btn-sm rounded-pill fw-bold">
+                    <i class="fas fa-sign-out-alt me-1"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <!-- 🎪 MAIN CONTENT AREA -->
+        <main class="main-content">
+
+            <!-- 🚀 TOP NAVIGATION BAR -->
+            <header class="top-bar glass-effect">
+                <div class="welcome-text">
+                    <button class="back-btn d-lg-none" onclick="toggleSidebar()" aria-label="Back to menu">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div>
+                        <h3 id="pageTitle" class="fw-bold text-dark m-0">Dashboard Overview</h3>
+                        <p id="currentDate" class="text-muted mb-0 small">
+                            <i class="far fa-calendar-alt me-1"></i>
+                            Loading...
+                            <span id="lastRefreshTime" class="ms-2">
+                                <i class="fas fa-sync-alt"></i> Updating...
+                            </span>
+                        </p>
+                    </div>
+                </div>
+                <div class="top-actions d-flex gap-3">
+                    <!-- 🔔 NOTIFICATION BELL - Enhanced -->
+                    <div class="notif-dropdown position-relative">
+                        <button class="icon-btn" id="notifBtn" aria-label="Notifications" aria-expanded="false">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge-count" id="alertCount" style="display:none;" aria-live="polite">0</span>
+                        </button>
+                        <div class="dropdown-menu-custom glass-effect" id="notifDropdown" aria-labelledby="notifBtn">
+                            <h6 class="p-3 border-bottom m-0 fw-bold text-danger">
+                                <i class="fas fa-exclamation-triangle me-1"></i> Live Alerts
+                                <small class="float-end text-muted fw-normal" id="notifCount">0 new</small>
+                            </h6>
+                            <ul id="alertList" class="alert-list p-0 m-0" style="list-style: none;"
+                                aria-label="Notification list">
+                                <li class="text-center text-muted p-3">
+                                    <i class="far fa-bell-slash fa-lg mb-2 d-block"></i>
+                                    <span>No active alerts</span>
+                                </li>
+                            </ul>
+                            <div class="p-3 border-top">
+                                <small class="text-muted d-block text-center">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Click alerts to locate bus
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🌙 DARK MODE TOGGLE (Top Bar) -->
+                    <div class="dark-mode-toggle d-none d-md-block">
+                        <label class="switch" aria-label="Toggle dark mode">
+                            <input type="checkbox" id="darkModeToggleTop">
+                            <span class="slider">
+                                <i class="fas fa-sun"></i>
+                                <i class="fas fa-moon"></i>
+                            </span>
+                        </label>
+                    </div>
+
+                    <!-- ⚙️ SETTINGS BUTTON -->
+                    <button class="icon-btn" title="Settings" onclick="switchTab(event, 'config')"
+                        aria-label="Settings">
+                        <i class="fas fa-cog"></i>
+                    </button>
+                </div>
+            </header>
+
+            <!-- 📄 CONTENT WRAPPER -->
+            <div class="content-wrapper">
+
+                <!-- 📊 DASHBOARD STATS SECTION -->
+                <section id="dashboard-stats" class="view-section active">
+                    <div class="stats-grid">
+                        <!-- REVENUE CARD -->
+                        <div class="stat-card revenue">
+                            <div class="icon-box"><i class="fas fa-hand-holding-usd"></i></div>
+                            <div class="stat-details">
+                                <h3>Total Revenue</h3>
+                                <h2 id="totalRevenue" aria-live="polite">₱0.00</h2>
+                                <small class="text-success fw-bold">
+                                    <i class="fas fa-arrow-up"></i> Live Tracking
+                                </small>
+                            </div>
+                        </div>
+                        <!-- ACTIVE BUSES CARD -->
+                        <div class="stat-card active-bus">
+                            <div class="icon-box"><i class="fas fa-bus-alt"></i></div>
+                            <div class="stat-details">
+                                <h3>Active Buses</h3>
+                                <h2 id="activeBuses" aria-live="polite">0</h2>
+                                <small class="text-info fw-bold">Units on road</small>
+                            </div>
+                        </div>
+                        <!-- PASSENGERS CARD -->
+                        <div class="stat-card passengers">
+                            <div class="icon-box"><i class="fas fa-users"></i></div>
+                            <div class="stat-details">
+                                <h3>Total Passengers</h3>
+                                <h2 id="totalPax" aria-live="polite">0</h2>
+                                <small>Regular, Student, Senior</small>
+                            </div>
+                        </div>
+                        <!-- EXPENSES CARD -->
+                        <div class="stat-card expenses">
+                            <div class="icon-box"><i class="fas fa-money-bill-wave"></i></div>
+                            <div class="stat-details">
+                                <h3>Daily Expenses</h3>
+                                <h2 id="dailyExpenses">₱0.00</h2>
+                                <small class="text-danger">
+                                    <i class="fas fa-chart-line"></i> Expense Tracking
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 🚨 EMERGENCY ALERT CARD -->
+                    <div class="alert alert-danger d-flex align-items-center shadow-sm mb-4 alert-card"
+                        id="mainAlertCard" style="display: none;" role="alert" aria-live="assertive">
+                        <i class="fas fa-exclamation-circle fa-2x me-3"></i>
+                        <div class="flex-grow-1">
+                            <h5 class="alert-heading fw-bold m-0">CRITICAL ALERT DETECTED</h5>
+                            <p class="m-0" id="mainAlertMsg">Please check the map immediately.</p>
+                        </div>
+                        <div class="d-flex gap-2">
+                            <button class="btn btn-light btn-sm fw-bold text-danger alert-dismiss"
+                                aria-label="Dismiss alert">
+                                <i class="fas fa-times"></i>
+                            </button>
+                            <button class="btn btn-light btn-sm fw-bold text-primary"
+                                onclick="switchTab(event, 'map-section')">
+                                VIEW MAP <i class="fas fa-map-marked-alt ms-1"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 📈 CHARTS ROW -->
+                    <div class="row g-4">
+                        <!-- REVENUE CHART -->
+                        <div class="col-xxl-8 col-xl-7">
+                            <div class="card glass-card h-100 border-0 shadow-sm">
+                                <div class="card-header-custom">
+                                    <h4><i class="fas fa-chart-area text-primary me-2"></i> Revenue Trend</h4>
+                                    <div class="chart-controls">
+                                        <select class="form-select form-select-sm w-auto" id="chartPeriod"
+                                            aria-label="Select chart period">
+                                            <option value="today">Today</option>
+                                            <option value="week">This Week</option>
+                                            <option value="month">This Month</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="chart-container">
+                                        <canvas id="mainChart" style="width:100%; height:300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- TOP PERFORMERS -->
+                        <div class="col-xxl-4 col-xl-5">
+                            <div class="card glass-card h-100 border-0 shadow-sm">
+                                <div class="card-header-custom">
+                                    <h4><i class="fas fa-trophy text-warning me-2"></i> Top Performers</h4>
+                                    <button class="btn btn-sm btn-outline-primary" onclick="refreshTopPerformers()"
+                                        aria-label="Refresh top performers">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body p-3">
+                                    <ul class="top-list list-unstyled mb-0" id="topPerformersList">
+                                        <li class="loading-item text-center text-muted py-4">
+                                            <i class="fas fa-spinner fa-spin me-2"></i> Loading...
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 🗺️ LIVE FLEET MAP SECTION -->
+                <section id="map-section" class="view-section" style="display: none;">
+                    <div class="card glass-card h-100 p-0 overflow-hidden border-0 shadow-sm">
+                        <div class="card-header-custom flex-between bg-white bg-opacity-50">
+                            <div>
+                                <h4 class="mb-0 fw-bold">
+                                    <i class="fas fa-satellite text-primary me-2"></i> Operations Map
+                                </h4>
+                                <small class="text-muted">Real-time bus tracking</small>
+                            </div>
+                            <div class="map-controls d-flex flex-wrap gap-2">
+                                <button class="btn btn-sm btn-dark rounded-pill shadow-sm"
+                                    onclick="window.toggleSatellite('live')" aria-label="Switch to satellite view">
+                                    <i class="fas fa-globe-asia me-1"></i> Satellite
+                                </button>
+                                <button class="btn btn-sm btn-primary rounded-pill shadow-sm"
+                                    onclick="window.toggleStreet('live')" aria-label="Switch to street view">
+                                    <i class="fas fa-map me-1"></i> Street
+                                </button>
+                                <button class="btn btn-sm btn-warning rounded-pill shadow-sm"
+                                    onclick="window.toggleTraffic()" aria-label="Toggle traffic layer">
+                                    <i class="fas fa-traffic-light me-1"></i> Traffic
+                                </button>
+                                <button class="btn btn-sm btn-info rounded-pill shadow-sm"
+                                    onclick="window.findBusOnMap()" aria-label="Find bus on map">
+                                    <i class="fas fa-search me-1"></i> Find Bus
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body p-0 position-relative map-container">
+                            <!-- 🔍 SEARCH CONTAINER -->
+                            <div class="map-search-container" style="position: relative;">
+                                <input type="text" id="findBusInput" placeholder="Search Bus Number (e.g. BUS 888)..."
+                                    aria-label="Search bus number" autocomplete="off">
+                                <button onclick="window.findBusOnMap()" aria-label="Search">
+                                    <i class="fas fa-search"></i>
+                                </button>
+                                <!-- Bus Search Suggestions -->
+                                <div id="busSuggestions" class="bus-suggestions" style="display: none;"></div>
+                            </div>
+                            <!-- 🗺️ MAP CONTAINER -->
+                            <div id="map" aria-label="Live fleet map"></div>
+                            <!-- 🎨 MAP LEGEND -->
+                            <div id="mapLegend" class="map-overlay-info glass-effect">
+                                <div class="d-flex justify-content-between align-items-center mb-2">
+                                    <h6 class="fw-bold small text-uppercase m-0">Legend</h6>
+                                    <button class="btn btn-sm btn-link p-0" onclick="window.toggleLegend()" title="Toggle legend">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                                <div class="legend-item"><span class="dot normal"></span> Active</div>
+                                <div class="legend-item"><span class="dot idle"></span> Offline</div>
+                                <div class="legend-item"><span class="dot emergency"></span> SOS (Emergency)</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 💰 SALES & ANALYTICS SECTION -->
+                <section id="sales" class="view-section" style="display: none;">
+                    <!-- 📊 QUICK STATS -->
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <div class="card glass-card bg-success text-white border-0 shadow-sm">
+                                <div class="card-body p-3">
+                                    <small class="opacity-75">GROSS REVENUE</small>
+                                    <h2 class="m-0 fw-bold" id="grossRevenue" aria-live="polite">₱0.00</h2>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card glass-card bg-danger text-white border-0 shadow-sm">
+                                <div class="card-body p-3 d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <small class="opacity-75">TOTAL EXPENSES</small>
+                                        <h2 class="m-0 fw-bold" id="totalExpenses" aria-live="polite">₱0.00</h2>
+                                    </div>
+                                    <button class="btn btn-light btn-sm text-danger fw-bold rounded-pill"
+                                        onclick="window.openExpenseModal()" aria-label="Add expense">
+                                        <i class="fas fa-plus"></i> ADD
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card glass-card bg-primary text-white border-0 shadow-sm">
+                                <div class="card-body p-3">
+                                    <small class="opacity-75">NET PROFIT</small>
+                                    <h2 class="m-0 fw-bold" id="netProfit" aria-live="polite">₱0.00</h2>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 📈 ANALYTICS CHARTS -->
+                    <div class="row g-4">
+                        <!-- TOP ROUTES CHART -->
+                        <div class="col-lg-8">
+                            <div class="card glass-card border-0 shadow-sm h-100">
+                                <div class="card-header-custom">
+                                    <h4><i class="fas fa-route text-info me-2"></i> Top Routes</h4>
+                                    <button class="btn btn-sm btn-outline-info" onclick="refreshRouteChart()"
+                                        aria-label="Refresh route chart">
+                                        <i class="fas fa-sync-alt"></i>
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="routeChart" style="max-height: 300px;"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- PAYMENT METHODS CHART -->
+                        <div class="col-lg-4">
+                            <div class="card glass-card border-0 shadow-sm h-100">
+                                <div class="card-header-custom">
+                                    <h4><i class="fas fa-wallet text-success me-2"></i> Payment Methods</h4>
+                                </div>
+                                <div class="card-body d-flex justify-content-center align-items-center">
+                                    <div style="width: 250px; height: 250px;">
+                                        <canvas id="paymentMethodChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- DETAILED REVENUE TABLE -->
+                        <div class="col-12">
+                            <div class="card glass-card border-0 shadow-sm">
+                                <div class="card-header-custom">
+                                    <h4><i class="fas fa-table text-primary me-2"></i> Detailed Bus Revenue</h4>
+                                    <input type="text" class="form-control form-control-sm w-auto"
+                                        placeholder="Filter buses..." id="busFilter" aria-label="Filter buses">
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table custom-table table-hover align-middle mb-0"
+                                            id="revenueTable">
+                                            <thead class="table-light">
+                                                <tr>
+                                                    <th>Status</th>
+                                                    <th>Bus No.</th>
+                                                    <th>Driver</th>
+                                                    <th>Conductor</th>
+                                                    <th>Route</th>
+                                                    <th class="text-end">Cash (₱)</th>
+                                                    <th class="text-end">GCash (₱)</th>
+                                                    <th class="text-end fw-bold">Total (₱)</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="revenueTableBody">
+                                                <tr>
+                                                    <td colspan="8" class="text-center py-4">
+                                                        <i class="fas fa-spinner fa-spin me-2"></i> Loading...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 📝 TRANSACTION LOGS SECTION -->
+                <section id="logs" class="view-section" style="display: none;">
+                    <div class="card glass-card border-0 shadow-sm">
+                        <div class="card-header-custom flex-between">
+                            <h4><i class="fas fa-list-alt text-primary me-2"></i> Transaction Logs</h4>
+                            <div class="d-flex gap-2">
+                                <button onclick="window.printTable()"
+                                    class="btn btn-secondary btn-sm rounded-pill shadow-sm" aria-label="Print table">
+                                    <i class="fas fa-print me-1"></i> Print
+                                </button>
+                                <button onclick="window.exportCSV()"
+                                    class="btn btn-success btn-sm rounded-pill shadow-sm" aria-label="Export CSV">
+                                    <i class="fas fa-file-excel me-1"></i> Export CSV
+                                </button>
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive custom-scrollbar" style="max-height: 600px;">
+                                <table class="table custom-table table-hover align-middle mb-0" id="transactionTable">
+                                    <thead class="table-light">
+                                        <tr>
+                                            <th>Time</th>
+                                            <th>Bus</th>
+                                            <th>Driver</th>
+                                            <th>Conductor</th>
+                                            <th>Route</th>
+                                            <th>Type</th>
+                                            <th class="text-end">Amount (₱)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="logsTableBody">
+                                        <tr>
+                                            <td colspan="7" class="text-center py-5">
+                                                <i class="fas fa-spinner fa-spin me-2"></i> Loading transactions...
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 🛣️ ROUTE CONFIGURATION SECTION -->
+                <section id="config" class="view-section" style="display: none;">
+                    <div class="row g-4">
+                        <!-- ROUTE MAPPER -->
+                        <div class="col-lg-8">
+                            <div class="card glass-card border-0 shadow-sm h-100">
+                                <div class="card-header-custom">
+                                    <div
+                                        class="d-flex flex-column flex-md-row justify-content-between align-items-start align-items-md-center mb-2">
+                                        <h4 class="mb-2 mb-md-0">
+                                            <i class="fas fa-map-marked-alt text-info me-2"></i> Route Mapper
+                                        </h4>
+                                        <div class="btn-group btn-group-sm">
+                                            <button class="btn btn-outline-secondary"
+                                                onclick="window.toggleSatellite('config')" aria-label="Satellite view">
+                                                <i class="fas fa-globe-asia"></i> Sat
+                                            </button>
+                                            <button class="btn btn-outline-primary"
+                                                onclick="window.toggleStreet('config')" aria-label="Street view">
+                                                <i class="fas fa-map"></i> Map
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column flex-md-row gap-2">
+                                        <button class="btn btn-sm btn-outline-danger" onclick="window.clearRoutePlot()"
+                                            aria-label="Clear route plot">
+                                            <i class="fas fa-times"></i> Clear Plot
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-warning"
+                                            onclick="alert('Tip: Click on the map to add stops.')"
+                                            title="Click map to add stops" aria-label="Add stop tip">
+                                            <i class="fas fa-plus"></i> Add Stop
+                                        </button>
+                                        <button class="btn btn-sm btn-success" onclick="window.finishPlotting()"
+                                            aria-label="Finish plotting route">
+                                            <i class="fas fa-check"></i> Finish Plotting
+                                        </button>
+                                    </div>
+                                    <small class="d-block mt-2 text-muted" id="originStatus">
+                                        Step 1: Click on the map to set Origin (Blue Line Visualization only).
+                                    </small>
+                                </div>
+                                <div class="card-body p-0 position-relative h-100" style="min-height: 500px;">
+                                    <div class="map-search-container"
+                                        style="position: absolute; top: 10px; left: 10px; z-index: 999;">
+                                        <input type="text" id="searchLocInput" placeholder="Search Location..."
+                                            aria-label="Search location">
+                                        <button onclick="window.searchLocation()" aria-label="Search">
+                                            <i class="fas fa-search-location"></i>
+                                        </button>
+                                    </div>
+                                    <div id="configMap" style="height: 100%; width: 100%; border-radius: 0 0 12px 12px;"
+                                        aria-label="Route configuration map"></div>
+                                    <input type="hidden" id="waypointsData">
+                                    <input type="hidden" id="originLat">
+                                    <input type="hidden" id="originLng">
+                                    <input type="hidden" id="destLat">
+                                    <input type="hidden" id="destLng">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ROUTE LIST & ADMIN TOOLS -->
+                        <div class="col-lg-4">
+                            <!-- ACTIVE ROUTES -->
+                            <div class="card glass-card border-0 shadow-sm mb-4">
+                                <div class="card-header-custom bg-primary text-white">
+                                    <h5 class="m-0 fw-bold">
+                                        <i class="fas fa-route me-2"></i> Active Routes
+                                    </h5>
+                                </div>
+                                <div class="card-body p-3">
+                                    <div class="d-flex gap-2 mb-3">
+                                        <button class="btn btn-light flex-grow-1 fw-bold btn-sm active" id="tabForward"
+                                            onclick="window.switchLoop('Routes_Forward')"
+                                            aria-label="Show forward routes">
+                                            FORWARD
+                                        </button>
+                                        <button class="btn btn-outline-light flex-grow-1 fw-bold btn-sm" id="tabReverse"
+                                            onclick="window.switchLoop('Routes_Reverse')"
+                                            aria-label="Show reverse routes">
+                                            REVERSE
+                                        </button>
+                                    </div>
+                                    <ul id="loopList" class="route-list custom-scrollbar"
+                                        style="max-height: 300px; overflow-y: auto;" aria-label="Route list">
+                                        <li class="text-center text-white small">Loading routes...</li>
+                                    </ul>
+                                    <button class="btn btn-success w-100 fw-bold mt-3 shadow-sm"
+                                        onclick="window.openRouteModal()" aria-label="Add new route">
+                                        <i class="fas fa-plus-circle me-2"></i> ADD NEW ROUTE
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- ADMIN TOOLS -->
+                            <div class="card glass-card border-0 shadow-sm">
+                                <div class="card-header-custom">
+                                    <h5 class="fw-bold m-0 text-secondary">
+                                        <i class="fas fa-cog me-2"></i> Admin Tools
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <!-- DARK MODE TOGGLE -->
+                                    <div
+                                        class="d-flex justify-content-between align-items-center mb-3 p-2 rounded border">
+                                        <span class="fw-bold small text-muted">
+                                            <i class="fas fa-moon me-2"></i> DARK MODE
+                                        </span>
+                                        <div class="form-check form-switch">
+                                            <input class="form-check-input" type="checkbox" id="darkModeToggle">
+                                        </div>
+                                    </div>
+                                    <!-- ADMIN ACTIONS -->
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-outline-primary" onclick="window.manageAccounts()"
+                                            aria-label="Manage accounts">
+                                            <i class="fas fa-users-cog me-2"></i> Manage Accounts
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="window.updatePasscode()"
+                                            aria-label="Reset passcode">
+                                            <i class="fas fa-key me-2"></i> Reset Passcode
+                                        </button>
+                                        <button class="btn btn-outline-warning" onclick="window.systemHealth()"
+                                            aria-label="System health">
+                                            <i class="fas fa-heartbeat me-2"></i> System Health
+                                        </button>
+                                        <button class="btn btn-outline-info" onclick="window.showAdminToolsModal()"
+                                            aria-label="More tools">
+                                            <i class="fas fa-tools me-2"></i> More Tools
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 👥 ADMIN TOOLS SECTION -->
+                <section id="admin-tools" class="view-section" style="display: none;">
+                    <div class="card glass-card border-0 shadow-sm">
+                        <div class="card-header-custom bg-secondary text-white">
+                            <h4 class="fw-bold m-0">
+                                <i class="fas fa-user-shield me-2"></i> User Management
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <!-- SEARCH BAR -->
+                            <div class="mb-4">
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-search"></i>
+                                    </span>
+                                    <input type="text" id="searchUser" class="form-control"
+                                        placeholder="Search users by name, email, or role..." aria-label="Search users">
+                                    <button class="btn btn-primary" onclick="filterActiveUsers()">
+                                        Search
+                                    </button>
+                                </div>
+                            </div>
+
+                            <!-- TABS -->
+                            <ul class="nav nav-tabs mb-4" id="adminTabs" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="pending-tab" data-bs-toggle="tab"
+                                        data-bs-target="#pending" type="button" role="tab" aria-controls="pending"
+                                        aria-selected="true">
+                                        <i class="fas fa-clock me-2"></i> Pending Approval
+                                        <span class="badge bg-warning ms-2" id="pendingCount">0</span>
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="active-tab" data-bs-toggle="tab"
+                                        data-bs-target="#active" type="button" role="tab" aria-controls="active"
+                                        aria-selected="false">
+                                        <i class="fas fa-user-check me-2"></i> Active Users
+                                        <span class="badge bg-success ms-2" id="activeCount">0</span>
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- TAB CONTENT -->
+                            <div class="tab-content" id="adminTabContent">
+                                <!-- PENDING TAB -->
+                                <div class="tab-pane fade show active" id="pending" role="tabpanel"
+                                    aria-labelledby="pending-tab">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>User Details</th>
+                                                    <th>Requested Role</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="pendingTable">
+                                                <tr>
+                                                    <td colspan="3" class="text-center text-muted py-4">
+                                                        No pending signups.
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <!-- ACTIVE TAB -->
+                                <div class="tab-pane fade" id="active" role="tabpanel" aria-labelledby="active-tab">
+                                    <div class="table-responsive">
+                                        <table class="table table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>User Details</th>
+                                                    <th>Role</th>
+                                                    <th>Status</th>
+                                                    <th>Actions</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="activeTable">
+                                                <tr>
+                                                    <td colspan="4" class="text-center text-muted py-4">
+                                                        Loading users...
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- 🚌 BUS DETAILS MODAL -->
+    <div id="busDetailsModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true"
+        aria-labelledby="modalBusNo">
+        <div class="modal-content glass-effect" style="max-width: 500px;">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-primary" id="modalBusNo">BUS ???</h5>
+                <button type="button" class="btn-close" onclick="window.closeBusModal()" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <div class="col-6">
+                        <small class="text-muted">Driver</small>
+                        <p class="fw-bold" id="modalDriver">---</p>
+                    </div>
+                    <div class="col-6">
+                        <small class="text-muted">Conductor</small>
+                        <p class="fw-bold" id="modalConductor">---</p>
+                    </div>
+                    <div class="col-12">
+                        <small class="text-muted">Route</small>
+                        <p class="fw-bold" id="modalRoute">---</p>
+                    </div>
+                </div>
+                <div class="row text-center bg-light py-3 rounded mb-3">
+                    <div class="col-4">
+                        <small>Passengers</small>
+                        <h5 class="fw-bold" id="modalPax">0</h5>
+                    </div>
+                    <div class="col-4 border-start border-end">
+                        <small>Cash</small>
+                        <h5 class="fw-bold text-success" id="modalCash">₱0</h5>
+                    </div>
+                    <div class="col-4">
+                        <small>GCash</small>
+                        <h5 class="fw-bold text-info" id="modalGcash">₱0</h5>
+                    </div>
+                </div>
+                <div id="modalEmergencyInfo" style="display:none;"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="window.closeBusModal()">Close</button>
+                <button type="button" class="btn btn-primary" onclick="window.locateBus(this.dataset.bus)"
+                    id="modalLocateBtn">
+                    <i class="fas fa-map-marker-alt me-2"></i> View on Map
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 💸 EXPENSE MODAL -->
+    <div id="expenseModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true"
+        aria-labelledby="expenseModalTitle">
+        <div class="modal-content glass-effect" style="max-width: 400px;">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-danger" id="expenseModalTitle">
+                    <i class="fas fa-receipt me-2"></i> Add Expense
+                </h5>
+                <button type="button" class="btn-close"
+                    onclick="document.getElementById('expenseModal').style.display='none'" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="expenseForm" onsubmit="event.preventDefault(); window.submitExpense();">
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Expense Category</label>
+                        <select id="expType" class="form-select" required>
+                            <option value="Fuel/Diesel">⛽ Fuel / Diesel</option>
+                            <option value="Maintenance">🔧 Maintenance</option>
+                            <option value="Toll Fees">🛣️ Toll Fees</option>
+                            <option value="Allowance">🍛 Allowance</option>
+                            <option value="Others">📝 Others</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Amount (PHP)</label>
+                        <input type="number" id="expAmount" class="form-control" placeholder="0.00" required
+                            step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Bus Number (Optional)</label>
+                        <input type="text" id="expBus" class="form-control"
+                            placeholder="Leave empty for general expense">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small text-muted">Notes</label>
+                        <textarea id="expNotes" class="form-control" rows="2"
+                            placeholder="Describe the expense..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-danger w-100 fw-bold">
+                        <i class="fas fa-save me-2"></i> SAVE EXPENSE
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 🛣️ ROUTE MODAL -->
+    <div id="routeModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true"
+        aria-labelledby="routeModalTitle">
+        <div class="modal-content glass-effect" style="max-width: 400px;">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-success" id="routeModalTitle">
+                    <i class="fas fa-map-signs me-2"></i> Add New Route
+                </h5>
+                <button type="button" class="btn-close"
+                    onclick="document.getElementById('routeModal').style.display='none'" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="routeForm" onsubmit="event.preventDefault(); window.saveRouteFromModal();">
+                    <input type="hidden" id="editRouteKey">
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Route Origin</label>
+                        <input type="text" id="routeFromModal" class="form-control" placeholder="Ex: FVR Terminal"
+                            required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Destination</label>
+                        <input type="text" id="routeToModal" class="form-control" placeholder="Ex: St. Cruz" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold text-secondary">Total Fare (PHP)</label>
+                        <div class="input-group">
+                            <span class="input-group-text">₱</span>
+                            <input type="number" id="routePriceModal" class="form-control" placeholder="0.00" required
+                                step="0.01">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100 fw-bold shadow-sm">
+                        <i class="fas fa-save me-2"></i> SAVE ROUTE
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- 👥 ADMIN TOOLS MODAL -->
+    <div id="adminToolsModal" class="modal-overlay" style="display: none;" role="dialog" aria-modal="true"
+        aria-labelledby="adminToolsTitle">
+        <div class="modal-content glass-effect" style="max-width: 500px;">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-secondary" id="adminToolsTitle">
+                    <i class="fas fa-tools me-2"></i> Advanced Admin Tools
+                </h5>
+                <button type="button" class="btn-close"
+                    onclick="document.getElementById('adminToolsModal').style.display='none'"
+                    aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-database fa-3x text-primary mb-3"></i>
+                                <h6>Database Backup</h6>
+                                <p class="small text-muted">Create system backup</p>
+                                <button class="btn btn-outline-primary btn-sm w-100">Backup Now</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                                <h6>Analytics Report</h6>
+                                <p class="small text-muted">Generate monthly report</p>
+                                <button class="btn btn-outline-success btn-sm w-100">Generate</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-bell fa-3x text-warning mb-3"></i>
+                                <h6>Notification Settings</h6>
+                                <p class="small text-muted">Configure alerts</p>
+                                <button class="btn btn-outline-warning btn-sm w-100">Configure</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card border-0 shadow-sm h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-user-lock fa-3x text-danger mb-3"></i>
+                                <h6>Security Audit</h6>
+                                <p class="small text-muted">Check system security</p>
+                                <button class="btn btn-outline-danger btn-sm w-100">Run Audit</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- PASSCODE SECTION -->
+                <div class="mt-4 p-3 border rounded">
+                    <h6 class="fw-bold mb-3"><i class="fas fa-key me-2"></i> Update Admin Passcode</h6>
+                    <div class="input-group">
+                        <input type="password" id="adminPasscode" class="form-control"
+                            placeholder="Enter new passcode (min. 6 chars)" aria-label="Admin passcode">
+                        <button class="btn btn-primary" onclick="window.updatePasscode()">Update</button>
+                    </div>
+                    <small class="text-muted d-block mt-2">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Passcode will be required for critical admin actions.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 📱 MOBILE BOTTOM NAVIGATION -->
+    <nav class="mobile-nav d-lg-none glass-effect" aria-label="Mobile navigation">
+        <a href="#dashboard-stats" class="nav-item active" onclick="switchTab(event, 'dashboard-stats')"
+            aria-label="Dashboard">
+            <i class="fas fa-chart-pie"></i>
+            <span>Dashboard</span>
+        </a>
+        <a href="#map-section" class="nav-item" onclick="switchTab(event, 'map-section')" aria-label="Map">
+            <i class="fas fa-map"></i>
+            <span>Map</span>
+        </a>
+        <a href="#sales" class="nav-item" onclick="switchTab(event, 'sales')" aria-label="Sales">
+            <i class="fas fa-coins"></i>
+            <span>Sales</span>
+        </a>
+        <a href="#logs" class="nav-item" onclick="switchTab(event, 'logs')" aria-label="Logs">
+            <i class="fas fa-file"></i>
+            <span>Logs</span>
+        </a>
+        <a href="#config" class="nav-item" onclick="switchTab(event, 'config')" aria-label="Config">
+            <i class="fas fa-cog"></i>
+            <span>Config</span>
+        </a>
+    </nav>
+
+    <!-- 📦 EXTERNAL LIBRARIES -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- 📜 INLINE SCRIPTS -->
+    <script>
+        // 📱 Mobile sidebar toggle
+        function toggleSidebar() {
+            const sidebar = document.querySelector('.sidebar');
+            sidebar.classList.toggle('mobile-open');
+
+            // Update ARIA attributes
+            const isOpen = sidebar.classList.contains('mobile-open');
+            sidebar.setAttribute('aria-expanded', isOpen);
+
+            if (isOpen) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        // 🔄 Tab switching function
+        function switchTab(e, targetId) {
+            if (e) e.preventDefault();
+
+            // Update active nav links
+            document.querySelectorAll('.nav-link, .nav-item').forEach(el => el.classList.remove('active'));
+            if (e && e.currentTarget) e.currentTarget.classList.add('active');
+
+            // Hide all sections
+            document.querySelectorAll('.view-section').forEach(section => {
+                section.style.display = 'none';
+                section.classList.remove('active');
+            });
+
+            // Show target section
+            const target = document.getElementById(targetId);
+            if (target) {
+                target.style.display = 'block';
+                target.classList.add('active');
+
+                // Update page title
+                const pageTitle = document.getElementById('pageTitle');
+                let linkText = 'Dashboard';
+
+                if (e && e.target) {
+                    const span = e.target.querySelector('span');
+                    linkText = span ? span.innerText : e.target.innerText;
+                }
+
+                pageTitle.innerText = linkText;
+
+                // Refresh map size if needed - with proper timing for responsive layout
+                if ((targetId === 'map-section') && window.mapInstance) {
+                    setTimeout(() => {
+                        window.mapInstance.invalidateSize(true);
+                        window.mapInstance.flyTo([14.8078, 121.0111], 13);
+                        window.dispatchEvent(new Event('resize'));
+                    }, 100);
+                    setTimeout(() => {
+                        window.mapInstance.invalidateSize(true);
+                    }, 300);
+                }
+                if ((targetId === 'config-section' || targetId === 'config') && window.configMapInstance) {
+                    setTimeout(() => {
+                        window.configMapInstance.invalidateSize(true);
+                        window.configMapInstance.flyTo([14.8078, 121.0111], 13);
+                        window.dispatchEvent(new Event('resize'));
+                    }, 100);
+                    setTimeout(() => {
+                        window.configMapInstance.invalidateSize(true);
+                    }, 300);
+                }
+
+                // Close mobile sidebar after selection
+                if (window.innerWidth < 992) {
+                    document.querySelector('.sidebar')?.classList.remove('mobile-open');
+                    document.body.style.overflow = '';
+                }
+
+                // Update URL hash
+                window.location.hash = targetId;
+            }
+        }
+
+        // 📅 Initialize date display
+        function updateDateTimeDisplay() {
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+            const timeStr = now.toLocaleTimeString('en-US', {
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            const dateElement = document.getElementById('currentDate');
+            if (dateElement) {
+                dateElement.innerHTML =
+                    `<i class="far fa-calendar-alt me-1"></i> ${dateStr} • ${timeStr}`;
+            }
+        }
+
+        // 🖱️ Close modals on outside click
+        document.addEventListener('click', function (e) {
+            const modals = ['busDetailsModal', 'expenseModal', 'routeModal', 'adminToolsModal'];
+            modals.forEach(modalId => {
+                const modal = document.getElementById(modalId);
+                if (modal && e.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+
+        // 📱 Handle mobile gestures
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', e => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', e => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeThreshold = 50;
+            const sections = ['dashboard-stats', 'map-section', 'sales', 'logs', 'config', 'admin-tools'];
+            const currentSection = Array.from(document.querySelectorAll('.view-section'))
+                .findIndex(section => section.classList.contains('active'));
+
+            if (touchEndX < touchStartX - swipeThreshold && currentSection < sections.length - 1) {
+                // Swipe left - go to next section
+                switchTab(null, sections[currentSection + 1]);
+            } else if (touchEndX > touchStartX + swipeThreshold && currentSection > 0) {
+                // Swipe right - go to previous section
+                switchTab(null, sections[currentSection - 1]);
+            }
+        }
+
+        // 🌙 Dark mode toggle
+        function setupDarkModeToggle() {
+            const themeToggle = document.getElementById('darkModeToggle');
+            const themeToggleTop = document.getElementById('darkModeToggleTop');
+            const currentTheme = localStorage.getItem('theme');
+
+            // Apply saved theme
+            if (currentTheme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                if (themeToggle) themeToggle.checked = true;
+                if (themeToggleTop) themeToggleTop.checked = true;
+            } else {
+                document.documentElement.setAttribute('data-theme', 'light');
+                if (themeToggle) themeToggle.checked = false;
+                if (themeToggleTop) themeToggleTop.checked = false;
+            }
+
+            // Setup toggle listeners
+            [themeToggle, themeToggleTop].forEach(toggle => {
+                if (toggle) {
+                    toggle.addEventListener('change', (e) => {
+                        const isDark = e.target.checked;
+                        if (isDark) {
+                            document.documentElement.setAttribute('data-theme', 'dark');
+                            localStorage.setItem('theme', 'dark');
+                        } else {
+                            document.documentElement.setAttribute('data-theme', 'light');
+                            localStorage.setItem('theme', 'light');
+                        }
+                        // Sync both toggles
+                        if (themeToggle) themeToggle.checked = isDark;
+                        if (themeToggleTop) themeToggleTop.checked = isDark;
+                    });
+                }
+            });
+        }
+
+        // 🔔 Notification dropdown
+        function setupNotificationDropdown() {
+            const btn = document.getElementById('notifBtn');
+            const dropdown = document.getElementById('notifDropdown');
+
+            if (btn && dropdown) {
+                btn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    const isVisible = dropdown.style.display === 'block';
+                    dropdown.style.display = isVisible ? 'none' : 'block';
+                    btn.setAttribute('aria-expanded', !isVisible);
+
+                    // Reset badge count when opened
+                    const badge = document.getElementById('alertCount');
+                    if (badge && !isVisible) {
+                        badge.style.display = 'none';
+                        badge.classList.remove('pulse-animation');
+                    }
+                });
+
+                // Close when clicking outside
+                document.addEventListener('click', (e) => {
+                    if (!btn.contains(e.target) && !dropdown.contains(e.target)) {
+                        dropdown.style.display = 'none';
+                        btn.setAttribute('aria-expanded', 'false');
+                    }
+                });
+
+                // Close when scrolling
+                window.addEventListener('scroll', () => {
+                    dropdown.style.display = 'none';
+                    btn.setAttribute('aria-expanded', 'false');
+                });
+            }
+        }
+
+        // 🚌 Show admin tools modal
+        window.showAdminToolsModal = () => {
+            document.getElementById('adminToolsModal').style.display = 'flex';
+        };
+
+        // 🔄 Refresh functions
+        window.refreshTopPerformers = () => {
+            showToast("Refreshing top performers...", "info");
+            // This would be implemented in dashboard.js
+        };
+
+        window.refreshRouteChart = () => {
+            showToast("Refreshing route chart...", "info");
+            // This would be implemented in dashboard.js
+        };
+
+        // 🛠️ Manage accounts function
+        window.manageAccounts = () => {
+            switchTab(null, 'admin-tools');
+        };
+
+        // 🏥 System health function
+        window.systemHealth = () => {
+            showToast("System health check initiated...", "info");
+            // Would show system status modal
+        };
+
+        // Initializations
+        document.addEventListener("DOMContentLoaded", () => {
+            updateDateTimeDisplay();
+            setInterval(updateDateTimeDisplay, 60000);
+
+            setupDarkModeToggle();
+            setupNotificationDropdown();
+
+            // Check URL hash for initial tab
+            const hash = window.location.hash.substring(1);
+            if (hash && document.getElementById(hash)) {
+                switchTab(null, hash);
+            }
+
+            // Auto-hide login modal if already logged in
+            const session = localStorage.getItem("dashboardSession");
+            if (session) {
+                const loginModal = document.getElementById("loginModal");
+                if (loginModal) loginModal.style.display = "none";
+            }
+        });
+
+        // Toast notification function
+        window.showToast = function (message, type = "info") {
+            console.log(`[Toast ${type}]: ${message}`);
+            // Full implementation in dashboard.js
+        };
+    </script>
+
+    <!-- 📦 MAIN APPLICATION SCRIPT -->
+    <script type="module" src="dashboard.js"></script>
+</body>
+
+</html>
