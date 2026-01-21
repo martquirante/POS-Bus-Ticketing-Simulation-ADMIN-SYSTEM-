@@ -1570,8 +1570,13 @@ canvas {
 
 .btn-warning {
     background: var(--warning-color);
-    color: #000;
+    color: #1a202c;
     border: 1px solid var(--warning-color);
+}
+
+[data-theme="dark"] .btn-warning {
+    color: #1a202c;
+    background: var(--warning-color);
 }
 
 .btn-info {
@@ -1808,12 +1813,12 @@ canvas {
         padding: 12px;
     }
 
-    .card-header-custom > div:first-child h4 {
+    .card-header-custom>div:first-child h4 {
         font-size: 0.95rem;
         margin-bottom: 2px;
     }
 
-    .card-header-custom > div:first-child small {
+    .card-header-custom>div:first-child small {
         font-size: 0.7rem;
     }
 
@@ -2924,7 +2929,365 @@ svg {
     color: var(--text-muted) !important;
 }
 
+/* =====================================================================================
+   📄 TRANSACTION DETAILS MODAL STYLES
+   ===================================================================================== */
+#transactionDetailsModal .modal-header {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%);
+    border-bottom: none;
+    border-radius: 20px 20px 0 0;
+    color: white;
+    padding: 25px 30px;
+}
 
+#transactionDetailsModal .modal-header .modal-title {
+    color: white;
+}
+
+#transactionDetailsModal .btn-close-white {
+    background: transparent;
+    border: none;
+    color: white;
+    cursor: pointer;
+    font-size: 1.5rem;
+    transition: opacity 0.2s;
+}
+
+#transactionDetailsModal .btn-close-white:hover {
+    opacity: 0.8;
+}
+
+#transactionDetailsModal .modal-body {
+    padding: 25px 30px;
+}
+
+#transactionDetailsModal .modal-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 20px 30px;
+    background: transparent;
+}
+
+.bg-gradient-primary {
+    background: linear-gradient(135deg, #4361ee 0%, #3a0ca3 100%) !important;
+}
+
+/* Receipt styling */
+.receipt-header {
+    text-align: center;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 2px dashed var(--border-color);
+}
+
+/* =====================================================================================
+   🛣️ ROUTE MAPPER ENHANCEMENTS
+   ===================================================================================== */
+
+/* Route Markers */
+.route-marker,
+.route-marker-finish {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+.route-marker-content {
+    transition: transform 0.2s ease;
+}
+
+.route-marker:hover .route-marker-content,
+.route-marker-finish:hover .route-marker-content {
+    transform: scale(1.15);
+}
+
+/* Route Popup */
+.route-popup {
+    font-family: 'Poppins', sans-serif;
+}
+
+.route-popup button {
+    font-family: 'Poppins', sans-serif;
+}
+
+/* Blue Route Line */
+.leaflet-pane .leaflet-path {
+    transition: stroke-width 0.2s ease;
+}
+
+/* Blue Line Highlight on Hover */
+.leaflet-interactive:hover {
+    stroke-width: 8 !important;
+}
+
+/* =====================================================================================
+   🗺️ LIVE FLEET MAP ENHANCEMENTS
+   ===================================================================================== */
+
+/* Bus Markers */
+.bus-marker,
+.bus-marker .bus-icon-wrapper {
+    transition: transform 0.2s ease;
+}
+
+.bus-marker:hover .bus-icon-wrapper {
+    transform: scale(1.2);
+    filter: brightness(1.1);
+}
+
+/* HQ Marker */
+.hq-marker {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+}
+
+/* Transaction/Ticket Markers */
+.transaction-marker {
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,0.2));
+    animation: pulse-marker 2s infinite;
+}
+
+@keyframes pulse-marker {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.7;
+    }
+}
+
+/* Bus Popup Styling */
+.bus-popup {
+    font-family: 'Poppins', sans-serif;
+}
+
+.bus-popup .popup-header {
+    padding: 8px 0;
+    margin-bottom: 10px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.bus-popup .popup-body {
+    margin: 10px 0;
+}
+
+.bus-popup .popup-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 6px 0;
+    border-bottom: 1px solid #f3f4f6;
+    font-size: 13px;
+}
+
+.bus-popup .popup-row:last-child {
+    border-bottom: none;
+}
+
+.bus-popup .popup-row.highlight {
+    background-color: #f0fdf4;
+    padding: 8px;
+    border-radius: 4px;
+    border: none;
+}
+
+/* =====================================================================================
+   📝 TRANSACTION LOGS ENHANCEMENTS
+   ===================================================================================== */
+
+/* Filter Section */
+.filter-section {
+    border-left: 4px solid #4361ee !important;
+}
+
+.filter-section h6 {
+    color: #1f2937;
+    font-weight: 600;
+}
+
+.filter-section .form-label {
+    color: #4b5563;
+    font-size: 12px;
+    margin-bottom: 6px;
+}
+
+.filter-section .form-control,
+.filter-section .form-select {
+    border: 1px solid #d1d5db;
+    background-color: white;
+    font-size: 13px;
+    height: 36px;
+}
+
+.filter-section .form-control:focus,
+.filter-section .form-select:focus {
+    border-color: #4361ee;
+    box-shadow: 0 0 0 0.2rem rgba(67, 97, 238, 0.1);
+}
+
+/* Summary Stats */
+.stat-box {
+    background: linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%);
+    border: 1px solid #e5e7eb;
+    border-radius: 12px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.stat-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-box small {
+    font-size: 12px;
+    font-weight: 500;
+    color: #6b7280;
+}
+
+.stat-box h5 {
+    font-size: 18px;
+    color: #1f2937;
+}
+
+/* Transaction Table Enhancements */
+.table.custom-table {
+    margin-bottom: 0;
+}
+
+.table.custom-table thead th {
+    background-color: #f9fafb;
+    color: #374151;
+    font-weight: 600;
+    font-size: 13px;
+    border-bottom: 2px solid #e5e7eb;
+}
+
+.table.custom-table tbody tr {
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.2s ease;
+}
+
+.table.custom-table tbody tr:hover {
+    background-color: #f9fafb;
+}
+
+.table.custom-table tbody td {
+    font-size: 13px;
+    color: #374151;
+}
+
+/* =====================================================================================
+   🚨 CRITICAL ALERT MODAL STYLES
+   ===================================================================================== */
+
+.critical-alert-modal {
+    background: linear-gradient(135deg, #fff5f5 0%, #fffafb 100%) !important;
+    border: 2px solid #ef4444 !important;
+    animation: slideDown 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+/* Blink animation for alert icon */
+@keyframes blink {
+    0%, 49% {
+        opacity: 1;
+    }
+    50%, 100% {
+        opacity: 0.3;
+    }
+}
+
+/* Pulse animation for alert modal */
+@keyframes alertPulse {
+    0%, 100% {
+        box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4);
+    }
+    50% {
+        box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+    }
+}
+
+.critical-alert-modal.alert-pulse {
+    animation: alertPulse 2s infinite;
+}
+
+/* Slide down animation */
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-30px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Alert modal header styling */
+.critical-alert-modal .modal-header {
+    border-radius: 20px 20px 0 0 !important;
+    box-shadow: 0 4px 12px rgba(239, 68, 68, 0.2);
+}
+
+/* Alert details section */
+.alert-details {
+    animation: fadeIn 0.3s ease;
+}
+
+.detail-row {
+    transition: background-color 0.2s ease;
+}
+
+.detail-row:hover {
+    background-color: #fecaca !important;
+    padding-left: 12px;
+}
+
+/* Alert action buttons */
+.critical-alert-modal .btn {
+    font-weight: 600;
+    transition: all 0.2s ease;
+}
+
+.critical-alert-modal .btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.critical-alert-modal .btn-primary {
+    background-color: #3b82f6;
+    border-color: #3b82f6;
+}
+
+.critical-alert-modal .btn-primary:hover {
+    background-color: #2563eb;
+}
+
+.critical-alert-modal .btn-warning {
+    background-color: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+.critical-alert-modal .btn-warning:hover {
+    background-color: #d97706;
+}
+
+.critical-alert-modal .btn-success {
+    background-color: #10b981;
+    border-color: #10b981;
+}
+
+.critical-alert-modal .btn-success:hover {
+    background-color: #059669;
+}
+
+/* Alert textarea */
+.critical-alert-modal textarea {
+    border: 1px solid #d1d5db;
+    font-size: 12px;
+    border-radius: 8px;
+}
+
+.critical-alert-modal textarea:focus {
+    border-color: #ef4444;
+    box-shadow: 0 0 0 0.2rem rgba(239, 68, 68, 0.1);
+}
 
 /* =====================================================================================
    END OF FILE

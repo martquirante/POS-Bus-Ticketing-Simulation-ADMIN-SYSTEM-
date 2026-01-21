@@ -1,0 +1,86 @@
+/* ==========================================================================================
+   THEME FONT COLOR FIX - Ensures proper text visibility across light and dark modes
+   ========================================================================================== */
+
+/* Light Mode - Default */
+body {
+    color: var(--dark-text);
+}
+
+/* Dark Mode Specific Fixes */
+[data-theme="dark"] {
+    /* Ensure all text is visible in dark mode */
+}
+
+[data-theme="dark"] body {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] p,
+[data-theme="dark"] .text-muted,
+[data-theme="dark"] small {
+    color: var(--text-muted);
+}
+
+[data-theme="dark"] h1,
+[data-theme="dark"] h2,
+[data-theme="dark"] h3,
+[data-theme="dark"] h4,
+[data-theme="dark"] h5,
+[data-theme="dark"] h6 {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] label {
+    color: var(--dark-text);
+}
+
+/* Ensure buttons maintain readability */
+[data-theme="dark"] .btn-warning {
+    background: var(--warning-color);
+    color: #1a202c;
+    border-color: var(--warning-color);
+}
+
+[data-theme="dark"] .btn-warning:hover {
+    background: #fdcb6e;
+    color: #1a202c;
+}
+
+/* Form inputs should be visible */
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background: var(--input-bg);
+    color: var(--dark-text);
+    border-color: var(--border-color);
+}
+
+[data-theme="dark"] input::placeholder {
+    color: var(--text-muted);
+}
+
+/* Table text visibility */
+[data-theme="dark"] .table {
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .table th,
+[data-theme="dark"] .table td {
+    color: var(--dark-text);
+}
+
+/* Alert and notification text */
+[data-theme="dark"] .alert {
+    color: var(--dark-text);
+}
+
+/* Dropdown menus */
+[data-theme="dark"] .dropdown-menu-custom {
+    background: var(--card-bg);
+    color: var(--dark-text);
+}
+
+[data-theme="dark"] .notif-item {
+    color: var(--dark-text);
+}
